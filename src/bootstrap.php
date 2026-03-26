@@ -2,23 +2,32 @@
 
 declare(strict_types=1);
 
+use App\Core\Bootstrap;
+use App\Core\Environment;
+use App\Core\SessionManager;
+
 define('BASE_PATH', dirname(__DIR__));
+
+spl_autoload_register(static function (string $class): void {
+    $prefix = 'App\\';
+
+    if (!str_starts_with($class, $prefix)) {
+        return;
+    }
+
+    $relativeClass = substr($class, strlen($prefix));
+    $path = BASE_PATH . '/src/' . str_replace('\\', '/', $relativeClass) . '.php';
+
+    if (is_file($path)) {
+        require $path;
+    }
+});
 
 require BASE_PATH . '/src/helpers.php';
 
-load_env(BASE_PATH . '/.env');
+$bootstrap = new Bootstrap(
+    new Environment(BASE_PATH . '/.env'),
+    new SessionManager(BASE_PATH . '/storage/sessions'),
+);
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    $sessionPath = BASE_PATH . '/storage/sessions';
-    $useCustomSessionPath = is_dir($sessionPath) || @mkdir($sessionPath, 0777, true);
-
-    if ($useCustomSessionPath && !is_writable($sessionPath)) {
-        $useCustomSessionPath = @chmod($sessionPath, 0777) && is_writable($sessionPath);
-    }
-
-    if ($useCustomSessionPath) {
-        session_save_path($sessionPath);
-    }
-
-    session_start();
-}
+$bootstrap->boot();
