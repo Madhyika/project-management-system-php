@@ -137,10 +137,15 @@ function db(): PDO
 
     if (!is_dir($directory)) {
         mkdir($directory, 0777, true);
+    } else {
+        @chmod($directory, 0777);
     }
 
     if (!is_file($database)) {
         touch($database);
+        @chmod($database, 0666);
+    } else {
+        @chmod($database, 0666);
     }
 
     $pdo = new PDO('sqlite:' . $database, null, null, [
