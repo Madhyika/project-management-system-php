@@ -1,7 +1,7 @@
 # Project Management System (Core PHP)
 
 A simple project management system built with plain PHP, PDO, and MySQL or SQLite.
-This version does not depend on Laravel at runtime.
+It follows an OOP structure inspired by Laravel-style MVC ideas, but does not use Laravel or any other framework at runtime.
 
 ## Features
 
@@ -10,7 +10,8 @@ This version does not depend on Laravel at runtime.
 - Assign tasks to users
 - Filter tasks by status
 - Session-based flash messages and validation errors
-- Lightweight routing and rendering in Core PHP
+- Lightweight controller-based routing in Core PHP
+- Model classes for database operations
 
 ## Tech Stack
 
@@ -23,9 +24,29 @@ This version does not depend on Laravel at runtime.
 ## Project Structure
 
 - `public/index.php`: front controller
-- `src/`: app bootstrap, helpers, routing, validation, and database access
+- `src/app.php`: route definitions
+- `src/Core/`: bootstrap and router classes
+- `src/Controllers/`: controller classes for request handling
+- `src/Models/`: model classes for database operations
+- `src/helpers.php`: shared helper functions for rendering, sessions, URLs, and utilities
 - `views/`: plain PHP templates
 - `database/setup.php`: database/table setup and default user seeding
+
+## Architecture
+
+The application now follows a simple OOP request flow:
+
+1. A route is defined in `src/app.php`.
+2. The router dispatches the request to a controller class and method.
+3. The controller creates model objects and calls model methods.
+4. The model handles database queries using PDO.
+5. The controller returns a view or redirects the user.
+
+Example:
+
+- Route: `/projects/{project}`
+- Controller: `ProjectController::show()`
+- Model calls: `Project::findById()`, `Task::forProject()`, `Task::statsForProject()`
 
 ## Installation
 
@@ -36,16 +57,17 @@ git clone https://github.com/Madhyika/project-management-system-php.git
 cd project-management-system-php
 ```
 
-3. Copy environment settings:
+2. Copy environment settings:
 
 ```bash
 cp .env.example .env
 ```
 
-4. Configure the database:
-    - For SQLite, keep `DB_CONNECTION=sqlite`. The app will use `database/database.sqlite` by default.
+3. Configure the database.
 
-    - For MySQL, update `.env`:
+For SQLite, keep `DB_CONNECTION=sqlite`. The app will use `database/database.sqlite` by default.
+
+For MySQL, update `.env`:
 
 ```env
 DB_CONNECTION=mysql
@@ -56,7 +78,11 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-5. Prepare the database:
+4. Prepare the database:
+
+```bash
+php database/setup.php
+```
 
 ## Usage
 
@@ -66,14 +92,4 @@ DB_PASSWORD=
 
 3. Open your browser and navigate to `http://localhost/project-management-system/public/`.
 
-4. Log in with the default user (check `database/setup.php` for credentials).
-
-5. Create projects, add tasks, assign users, and manage your projects.
-
-## Contributing
-
-1. Fork the repository.
-2. Create a feature branch: `git checkout -b feature-name`.
-3. Commit your changes: `git commit -am 'Add some feature'`.
-4. Push to the branch: `git push origin feature-name`.
-5. Submit a pull request.
+4. Create users, projects, and tasks from the browser interface.
